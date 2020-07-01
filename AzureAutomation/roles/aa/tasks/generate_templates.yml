@@ -1,0 +1,30 @@
+---
+
+# Required variables
+#   - none
+
+# Required credentials:
+#   - Ansible Tower service account
+
+
+- include_vars: 
+    file: templates.yml
+    name: aa_templates
+
+- awx.awx.tower_job_template:
+    ask_credential: yes
+    credentials:
+    name: "{{ item.name }}"
+    #description: ""
+    #extra_vars: ""
+    inventory: "{{ aa_templates.inventory }}"
+    job_tags: "{{ item.job_tags }}"
+    job_type: run
+    limit: "{{ aa_templates.limit }}"
+    project: "{{ item.project }}"
+    playbook: "{{ item.playbook }}"
+    survey_enabled: yes
+    survey_spec: "{{ item.survey_spec }}"
+  with_items: "{{ aa_templates.list }}"
+  run_once: true
+  delegate_to: localhost

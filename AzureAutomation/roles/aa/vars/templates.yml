@@ -1,0 +1,35 @@
+---
+inventory: "Empty Inventory"
+limit: localhost
+
+list:
+- name: "Azure - Create VNet with subnets (DEV)"
+  project: "DevOps - Automation Tools - Ansible (@dev)"
+  playbook: "AzureAutomation/site.yml"
+  job_tags: "untagged,create_vnet"
+  survey_spec:
+    name: ""
+    description: ""
+    spec:
+    - question_name: Resource Group
+      question_description: 'This is the resource group where the virtual network is to be located'
+      required: true
+      type: text
+      variable: aa_resource_group
+      min: 1
+      max: 90
+    - question_name: Virtual Network Name
+      question_description: 'Name of the virtual network to be created'
+      required: true
+      type: text
+      variable: aa_vnet_name
+      min: 1
+      max: 80
+    - question_name: Provide list of subnets
+      question_description: "One per line: 172.26.1.0/24 SubnetName"
+      required: true
+      type: textarea
+      variable: aa_subnets_freeform
+      default: "172.26.1.0/24 ExampleSubnet1\n172.26.2.0/24 ExampleSubnet2"
+      min: 14
+      max: 999

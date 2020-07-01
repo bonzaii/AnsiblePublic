@@ -1,0 +1,25 @@
+---
+- name: "Windows Desktop Services - Localhost tasks"
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  collections:
+    - azure.azcollection
+    - awx.awx
+
+# import_role tags add given tag to every task
+# include_role tags trigger include only when tag is present
+
+#
+# This is to be triggered for all the tasks that will have no Inventory
+# limit: localhost
+#
+  tasks:
+    - debug:
+        msg: "Triggering localhost task list"
+      tags: [ never, debug ]
+
+    - include_role:
+        name: aa
+

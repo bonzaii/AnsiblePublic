@@ -1,0 +1,7 @@
+---
+
+- include_tasks: create-vnet.yml
+  tags: create_vnet
+
+- include_tasks: generate_templates.yml
+  tags: generate_templates

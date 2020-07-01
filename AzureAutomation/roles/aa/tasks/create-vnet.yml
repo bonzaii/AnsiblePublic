@@ -1,0 +1,67 @@
+---
+
+#
+# Process:
+# 1. Create vNet
+# 2. Process aa_subnets_freeform
+# 3. Create subnets
+#
+# aa_subnets_freeform should take form of:
+#   CIDR SubnetName1
+#   CIDR SubnetName2
+# Example:
+#   10.0.1.0/24 ProductionSubnet
+#   10.0.16.0/23 DevelopmentSubnet
+
+# Required variables
+#   - aa_resource_group
+#   - aa_vnet_name
+#   - aa_subnets_freeform
+
+# Required credentials:
+#   - azure tenant
+
+#
+# Task 1: Process data
+# 
+- name: "Generating subnet list (1/2)"
+  set_fact:
+    aa_subnets_list: "{{ [ aa_subnets_freeform.split('\n')[0].split(' ')[0] ] }}"
+  run_once: true
+  delegate_to: localhost
+
+- name: "Generating subnet list (2/2)"
+  set_fact:
+    aa_subnets_list: "{{ aa_subnets_list + [ item.split(' ')[0] ] }}"
+  loop: "{{ aa_subnets_freeform.split('\n') }}"
+  when: (item.split(' ')[0] not in aa_subnets_list and item.split(' ')[0]|ipaddr('net'))
+  run_once: true
+  delegate_to: localhost
+
+- name: "Generated subnet list"
+  debug:
+    msg: "{{ aa_subnets_list }}"
+  tags: [ debug ]
+
+#
+# Task 2: Create VNet
+#
+- azure.azcollection.azure_rm_virtualnetwork:
+    resource_group: "{{ aa_resource_group }}"
+    name: "{{ aa_vnet_name }}"
+    address_prefixes_cidr: "{{ aa_subnets_list }}"
+  run_once: true
+  delegate_to: localhost
+
+#
+# Task 3: Create subnets
+#
+- azure.azcollection.azure_rm_subnet:
+    resource_group: "{{ aa_resource_group }}"
+    virtual_network_name: "{{ aa_vnet_name }}"
+    name: "{{ item.split(' ')[1] }}"
+    address_prefix_cidr: "{{ item.split(' ')[0] }}"
+  loop: "{{ aa_subnets_freeform.split('\n') }}"
+  when: item.split(' ')[0]|ipaddr('net')
+  run_once: true
+  delegate_to: localhost
